@@ -1,0 +1,24 @@
+[package]
+name = "server"
+version = "0.1.0"
+edition.workspace = true
+description = "Game server for Reis ümber maailma: rooms, turn timer, WebSockets"
+
+[dependencies]
+axum = { version = "0.8.9", features = ["ws"] }
+protocol = { path = "../protocol" }
+rand = "0.10.3"
+rules = { path = "../rules" }
+serde_json = "1.0.151"
+tokio = { version = "1.53.2", features = ["rt-multi-thread", "macros", "sync", "time", "net", "signal"] }
+tower-http = { version = "0.7.1", features = ["fs"] }
+tracing = "0.1.44"
+tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
+
+[dev-dependencies]
+futures-util = "0.3.34"
+http-body-util = "0.1.5"
+tempfile = "3.27.0"
+tokio = { version = "1.53.2", features = ["test-util", "rt", "macros", "time", "sync"] }
+tokio-tungstenite = "0.30.0"
+tower = { version = "0.5.3", features = ["util"] }

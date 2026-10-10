@@ -113,11 +113,14 @@ Hetk, mil lõpetamata on alles ainult üks mängija; lõpetanud mängijad jäeta
 ### Võrgumäng
 
 **Tuba** (`Room`):
-Üks mängukord koos oma mängijatega, kuhu liitutakse kutselingi kaudu.
-_Väldi_: lobby, sessioon, mäng
+Mängijate kogunemiskoht, kuhu liitutakse kutselingi kaudu ja kus peetakse üks või mitu järjestikust mängu.
+_Väldi_: sessioon, mäng
+
+**Ootesaal** (`Lobby`):
+Toa olek enne mängu algust: mängijad liituvad ja lahkuvad, igaüks saab automaatselt esimese vaba värvi päripäeva ja võib selle vaba värvi vastu vahetada.
 
 **Võõrustaja** (`Host`):
-Toa looja, kes alustab mängu, kui toas on 2–4 mängijat.
+Toa looja või tema ootesaalist lahkumisel järgmine mängija; alustab mängu, kui toas on 2–4 mängijat.
 
 **Külaline** (`Guest`):
 Ilma kontota mängija, keda tuntakse ainult hüüdnime järgi.
@@ -126,7 +129,10 @@ Ilma kontota mängija, keda tuntakse ainult hüüdnime järgi.
 Link, mille kaudu külaline tuppa liitub.
 
 **Käiguaeg** (`TurnTimer`):
-Aeg, mille jooksul mängija peab viskama või käima; selle möödumisel teeb server seda tema eest.
+30-sekundiline aeg, mille jooksul mängija peab viskama või käima; selle möödumisel viskab server tema eest või teeb esimese lubatud käigu.
 
 **Eemal** (`Away`):
-Mängija olek pärast kolme järjestikust käiguaja möödumist või ühenduse katkemist; server mängib tema eest, kuni ta naaseb.
+Mängija olek pärast kolme järjestikust käiguaja möödumist või kui ühendus on katkenud kauem kui 10 sekundit; server mängib tema eest. Lõpeb, kui mängija ise viskab või käib või uuesti ühendub.
+
+**Uus mäng** (`Rematch`):
+Võõrustaja valik pärast mängu lõppu viia tuba samade mängijatega tagasi ootesaali.

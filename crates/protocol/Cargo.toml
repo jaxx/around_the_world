@@ -1,0 +1,12 @@
+[package]
+name = "protocol"
+version = "0.1.0"
+edition.workspace = true
+description = "Messages between the Reis ümber maailma server and browser client"
+
+[dependencies]
+rules = { path = "../rules" }
+serde = { version = "1.0.229", features = ["derive"] }
+
+[dev-dependencies]
+serde_json = "1.0.151"
