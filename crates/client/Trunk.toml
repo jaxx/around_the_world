@@ -1,0 +1,19 @@
+# `trunk serve` (development): the client on :8081, the game server on :8080.
+# `trunk build --release` (production): output in dist/, served by the game
+# server with STATIC_DIR=crates/client/dist.
+
+[build]
+target = "index.html"
+dist = "dist"
+
+[serve]
+addresses = ["127.0.0.1"]
+port = 8081
+
+# The more specific WebSocket prefix wins over the general /api/ one.
+[[proxy]]
+backend = "ws://127.0.0.1:8080/api/ws/"
+ws = true
+
+[[proxy]]
+backend = "http://127.0.0.1:8080/api/"

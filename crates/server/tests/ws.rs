@@ -128,7 +128,7 @@ async fn closing_the_socket_disconnects_the_seat() {
 #[tokio::test]
 async fn an_unknown_room_has_no_socket() {
     let addr = common::serve(common::registry(Limits::default())).await;
-    let url = format!("ws://{addr}/api/rooms/ZZZZZZ/ws");
+    let url = format!("ws://{addr}/api/ws/ZZZZZZ");
     let err = tokio_tungstenite::connect_async(url).await.unwrap_err();
     let tokio_tungstenite::tungstenite::Error::Http(response) = err else {
         panic!("expected an HTTP refusal, got {err:?}");

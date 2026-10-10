@@ -25,7 +25,7 @@ pub fn router(registry: Registry) -> Router {
     Router::new()
         .route("/api/rooms", post(create_room))
         .route("/api/rooms/{code}/join", post(join_room))
-        .route("/api/rooms/{code}/ws", get(open_socket))
+        .route("/api/ws/{code}", get(open_socket))
         .with_state(registry)
 }
 

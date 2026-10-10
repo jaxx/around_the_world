@@ -37,7 +37,7 @@ pub struct Ws(WebSocketStream<MaybeTlsStream<TcpStream>>);
 
 impl Ws {
     pub async fn open(addr: SocketAddr, code: &str) -> Ws {
-        let url = format!("ws://{addr}/api/rooms/{code}/ws");
+        let url = format!("ws://{addr}/api/ws/{code}");
         Ws(connect_async(url).await.expect("websocket opens").0)
     }
 

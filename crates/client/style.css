@@ -1,0 +1,475 @@
+:root {
+  --paper: #f4ecd8;
+  --ink: #2b2420;
+  --track: #3b302a;
+  --red: #d8402f;
+  --yellow: #e9c62c;
+  --green: #3f8a4f;
+  --blue: #1f5fa8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+h1 {
+  margin: 0 0 12px;
+  font-size: 1.6rem;
+}
+
+.board {
+  display: block;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.board-paper {
+  fill: #fbf6e9;
+}
+
+.board-frame {
+  fill: none;
+  stroke: var(--red);
+  stroke-width: 4;
+}
+
+.cell.track {
+  fill: var(--track);
+}
+
+.cell.red {
+  fill: var(--red);
+}
+
+.cell.yellow {
+  fill: var(--yellow);
+}
+
+.cell.green {
+  fill: var(--green);
+}
+
+.cell.blue {
+  fill: var(--blue);
+}
+
+.arrow line,
+.arrow polyline {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+h1 a {
+  color: inherit;
+  text-decoration: none;
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.home {
+  display: grid;
+  gap: 16px;
+  max-width: 420px;
+}
+
+.room {
+  display: grid;
+  gap: 16px;
+}
+
+.room .card {
+  max-width: 420px;
+}
+
+.card {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  background: #fbf6e9;
+  border: 2px solid #e2d6b8;
+  border-radius: 12px;
+}
+
+.field {
+  display: grid;
+  gap: 4px;
+  font-weight: 600;
+}
+
+input {
+  font: inherit;
+  padding: 10px 12px;
+  border: 2px solid #cbbd99;
+  border-radius: 8px;
+  background: #fff;
+}
+
+button {
+  font: inherit;
+  font-weight: 700;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--red);
+  color: #fff;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.problem {
+  margin: 0;
+  color: #9b2414;
+  font-weight: 600;
+}
+
+.room-code,
+.status {
+  margin: 0;
+}
+
+h3 {
+  margin: 4px 0 0;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6b5d4f;
+}
+
+.lobby {
+  max-width: 480px;
+}
+
+.seats {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.seat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.seat .dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--seat-color);
+}
+
+.seat .name {
+  font-weight: 600;
+}
+
+.tag {
+  font-size: 0.8rem;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #e8dcc0;
+}
+
+.tag.gone {
+  background: #f3d2cb;
+  color: #9b2414;
+}
+
+.red {
+  --seat-color: var(--red);
+}
+
+.yellow {
+  --seat-color: var(--yellow);
+}
+
+.green {
+  --seat-color: var(--green);
+}
+
+.blue {
+  --seat-color: var(--blue);
+}
+
+.colors {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+button.color {
+  background: var(--seat-color);
+  color: #fff;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 0.4);
+  border: 3px solid transparent;
+}
+
+button.color[aria-pressed="true"] {
+  border-color: var(--ink);
+}
+
+button.color:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.invite {
+  display: flex;
+  gap: 8px;
+}
+
+.invite input {
+  flex: 1;
+  min-width: 0;
+}
+
+.hint {
+  margin: 0;
+  color: #6b5d4f;
+}
+
+button.start {
+  background: var(--green);
+}
+
+button.leave {
+  background: transparent;
+  color: var(--ink);
+  border: 2px solid #cbbd99;
+}
+
+/* Game screen */
+
+.game {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  align-items: start;
+}
+
+@media (max-width: 760px) {
+  .game {
+    grid-template-columns: 1fr;
+  }
+}
+
+.panel {
+  gap: 10px;
+}
+
+.turn {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.countdown {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  color: #6b5d4f;
+}
+
+.dice-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.die {
+  width: 56px;
+  height: 56px;
+}
+
+.die rect {
+  fill: #fff;
+  stroke: var(--seat-color);
+  stroke-width: 4;
+}
+
+.die circle {
+  fill: var(--ink);
+}
+
+button.roll {
+  flex: 1;
+  font-size: 1.1rem;
+  padding: 14px 16px;
+}
+
+.tag.turn {
+  background: var(--ink);
+  color: #fff;
+}
+
+.tag.place {
+  background: #f0d97a;
+}
+
+.piece-rim {
+  fill: #fff;
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+
+.piece.red .piece-body {
+  fill: var(--red);
+}
+
+.piece.yellow .piece-body {
+  fill: var(--yellow);
+}
+
+.piece.green .piece-body {
+  fill: var(--green);
+}
+
+.piece.blue .piece-body {
+  fill: var(--blue);
+}
+
+.piece.finished .piece-rim {
+  stroke: #c9a227;
+  stroke-width: 4;
+}
+
+.piece.movable {
+  cursor: pointer;
+}
+
+.piece.movable .piece-rim {
+  stroke: #111;
+  stroke-width: 5;
+  animation: pulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+  from {
+    stroke-opacity: 1;
+  }
+  to {
+    stroke-opacity: 0.35;
+  }
+}
+
+.destination {
+  fill: none;
+  stroke: #111;
+  stroke-width: 3;
+  stroke-dasharray: 6 5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .piece.movable .piece-rim {
+    animation: none;
+  }
+}
+
+/* Pieces must stand out on circles of their own colour. */
+.cell.nest {
+  fill-opacity: 0.3;
+}
+
+.cell.lane {
+  fill-opacity: 0.55;
+}
+
+.piece.movable .piece-rim {
+  fill: #fff6a8;
+  stroke-width: 6;
+}
+
+/* Animation */
+
+.pieces g.piece {
+  transition: transform 110ms linear;
+}
+
+/* Leaving or returning to the nest takes a longer, visible flight. */
+.pieces g.piece.home {
+  transition-duration: 400ms;
+  transition-timing-function: ease-in-out;
+}
+
+.die.rolling {
+  animation: tumble 600ms ease-out;
+}
+
+@keyframes tumble {
+  0% {
+    transform: rotate(0deg) scale(0.8);
+  }
+  40% {
+    transform: rotate(200deg) scale(1.1);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pieces g.piece,
+  .pieces g.piece.home {
+    transition: none;
+  }
+
+  .die.rolling {
+    animation: none;
+  }
+}
+
+.log {
+  margin: 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 2px;
+  font-size: 0.95rem;
+}
+
+.log li:first-child {
+  font-weight: 700;
+}
+
+/* Game over */
+
+.results {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  font-size: 1.05rem;
+}
+
+.results li:first-child .name {
+  font-size: 1.2rem;
+}
+
+button.rematch {
+  background: var(--green);
+}
