@@ -142,7 +142,8 @@ impl RoomState {
         self.seats.iter().find(|s| &s.token == token).map(|s| s.id)
     }
 
-    /// Applies a client message from `seat`. `Hello` is the shell's business.
+    /// Applies a client message from `seat`. `Hello` and `Ping` are the
+    /// shell's business and never reach a room.
     pub fn handle(
         &mut self,
         seat: SeatId,
@@ -151,7 +152,7 @@ impl RoomState {
         dice: &mut (impl Dice + ?Sized),
     ) -> Result<Vec<Event>, ErrorCode> {
         match (&self.stage, msg) {
-            (_, ClientMsg::Hello { .. }) => Err(ErrorCode::BadMessage),
+            (_, ClientMsg::Hello { .. } | ClientMsg::Ping) => Err(ErrorCode::BadMessage),
             (Stage::Lobby, ClientMsg::ChooseColor { color }) => self.choose_color(seat, color),
             (Stage::Lobby, ClientMsg::Leave) => {
                 self.remove_seat(seat);

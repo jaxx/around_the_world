@@ -1,0 +1,21 @@
+# Render Blueprint: one free web service built from the Dockerfile.
+# Reference: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: reis-ymber-maailma
+    runtime: docker
+    plan: free
+    region: frankfurt
+    branch: master
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      # Proxies in front of the server that append to X-Forwarded-For. A
+      # starting guess for Render; check the "creating a room" debug log
+      # after the first deploy and adjust (see crates/server/src/client_ip.rs).
+      - key: TRUST_PROXY_HOPS
+        value: "3"
+      # Debug for the server while the proxy hops are being checked.
+      - key: RUST_LOG
+        value: info,server=debug

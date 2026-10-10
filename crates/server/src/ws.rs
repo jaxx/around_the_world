@@ -34,6 +34,8 @@ pub(crate) async fn session(mut socket: WebSocket, room: RoomHandle) {
         tokio::select! {
             incoming = socket.recv() => match incoming {
                 Some(Ok(Message::Text(text))) => match serde_json::from_str::<ClientMsg>(&text) {
+                    // Heartbeats only keep the host awake (ADR 0002).
+                    Ok(ClientMsg::Ping) => {}
                     Ok(msg) => room.send(conn, msg).await,
                     Err(_) => {
                         if send(&mut socket, &bad_message()).await.is_err() {

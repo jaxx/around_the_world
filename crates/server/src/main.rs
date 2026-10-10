@@ -32,7 +32,7 @@ async fn main() {
         Limits::default(),
         Arc::new(|| Box::new(RandomDice(rand::make_rng::<StdRng>()))),
     );
-    let app = server::http::app(registry, config.static_dir.as_deref());
+    let app = server::http::app(registry, config.static_dir.as_deref(), config.proxy_hops);
     let listener = match tokio::net::TcpListener::bind(("0.0.0.0", config.port)).await {
         Ok(listener) => listener,
         Err(problem) => {
@@ -43,6 +43,7 @@ async fn main() {
     tracing::info!(
         addr = %listener.local_addr().expect("bound"),
         static_dir = ?config.static_dir,
+        proxy_hops = config.proxy_hops,
         "listening"
     );
 

@@ -79,6 +79,18 @@ async fn an_unknown_token_is_refused() {
 }
 
 #[tokio::test]
+async fn a_ping_is_ignored_and_answered_with_nothing() {
+    let (addr, mari, _) = room().await;
+    let mut ws = hello(addr, &mari).await;
+    ws.send(&ClientMsg::Ping).await;
+    // Had the ping produced anything (an error, or a snapshot still showing
+    // red), it would arrive before the answer to this colour change.
+    ws.send(&ClientMsg::ChooseColor { color: Color::Blue })
+        .await;
+    assert_eq!(ws.snapshot().await.seats[0].color, Color::Blue);
+}
+
+#[tokio::test]
 async fn a_bad_message_is_reported_but_the_socket_stays_open() {
     let (addr, mari, _) = room().await;
     let mut ws = hello(addr, &mari).await;

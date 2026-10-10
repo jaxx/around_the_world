@@ -11,7 +11,7 @@ use tokio::sync::oneshot;
 async fn the_server_stops_when_asked() {
     let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
     let addr = listener.local_addr().unwrap();
-    let app = server::http::app(common::registry(Limits::default()), None);
+    let app = server::http::app(common::registry(Limits::default()), None, 0);
     let (stop, stopped) = oneshot::channel::<()>();
     let server = tokio::spawn(server::run(listener, app, async {
         let _ = stopped.await;

@@ -7,12 +7,12 @@ use futures::stream::Fuse;
 use futures::{FutureExt, SinkExt, StreamExt, select};
 use gloo_net::websocket::Message;
 use gloo_net::websocket::futures::WebSocket;
-use gloo_timers::future::TimeoutFuture;
+use gloo_timers::future::{IntervalStream, TimeoutFuture};
 use leptos::prelude::*;
 use leptos::task::spawn_local;
 use protocol::{ClientMsg, RoomCode, SeatToken, ServerMsg};
 
-use crate::session::{Effect, Session};
+use crate::session::{Effect, HEARTBEAT, Session};
 
 /// Queues messages for the room. Dropping every clone closes the socket.
 #[derive(Clone)]
@@ -53,8 +53,16 @@ async fn run(
             };
             if write.send(text(&hello)).await.is_ok() {
                 session.try_update(Session::opened);
+                // Only messages to the server keep a free host awake, so the
+                // heartbeat ticks whatever the server is sending (ADR 0002).
+                let mut heartbeat = IntervalStream::new(HEARTBEAT.as_millis() as u32).fuse();
                 loop {
                     select! {
+                        _ = heartbeat.next() => {
+                            if write.send(text(&ClientMsg::Ping)).await.is_err() {
+                                break;
+                            }
+                        }
                         incoming = read.next() => match incoming {
                             Some(Ok(Message::Text(json))) => {
                                 let Ok(msg) = serde_json::from_str::<ServerMsg>(&json) else {

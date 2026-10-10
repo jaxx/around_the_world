@@ -28,7 +28,7 @@ pub fn registry(limits: Limits) -> Registry {
 pub async fn serve(registry: Registry) -> SocketAddr {
     let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
     let addr = listener.local_addr().unwrap();
-    let app = server::http::router(registry).into_make_service_with_connect_info::<SocketAddr>();
+    let app = server::http::router(registry, 0).into_make_service_with_connect_info::<SocketAddr>();
     tokio::spawn(async move { axum::serve(listener, app).await.unwrap() });
     addr
 }

@@ -22,7 +22,7 @@ fn client_dir() -> tempfile::TempDir {
 }
 
 fn app(static_dir: Option<&Path>) -> Router {
-    server::http::app(common::registry(Limits::default()), static_dir)
+    server::http::app(common::registry(Limits::default()), static_dir, 0)
         .layer(MockConnectInfo(SocketAddr::from(([10, 0, 0, 1], 5000))))
 }
 

@@ -15,8 +15,66 @@ use server::registry::Limits;
 use tower::ServiceExt;
 
 fn app(limits: Limits) -> Router {
-    server::http::router(common::registry(limits))
+    behind_proxies(limits, 0)
+}
+
+/// The API as if `hops` trusted proxies stood in front of it; every request
+/// arrives from the same proxy address.
+fn behind_proxies(limits: Limits, hops: u8) -> Router {
+    server::http::router(common::registry(limits), hops)
         .layer(MockConnectInfo(SocketAddr::from(([10, 0, 0, 1], 5000))))
+}
+
+/// Creates a room as a client the proxy saw at `client`.
+async fn create_from(app: &Router, client: &str) -> StatusCode {
+    let request = Request::post("/api/rooms")
+        .header(header::CONTENT_TYPE, "application/json")
+        .header("x-forwarded-for", client)
+        .body(Body::from(r#"{"nickname":"Mari"}"#))
+        .unwrap();
+    app.clone().oneshot(request).await.unwrap().status()
+}
+
+#[tokio::test]
+async fn behind_trusted_proxies_each_client_has_its_own_rate_limit() {
+    let app = behind_proxies(
+        Limits {
+            max_rooms: 100,
+            rooms_per_ip: 1,
+        },
+        1,
+    );
+    assert_eq!(create_from(&app, "1.1.1.1").await, StatusCode::CREATED);
+    assert_eq!(create_from(&app, "2.2.2.2").await, StatusCode::CREATED);
+    assert_eq!(
+        create_from(&app, "1.1.1.1").await,
+        StatusCode::TOO_MANY_REQUESTS
+    );
+}
+
+#[tokio::test]
+async fn without_trusted_proxies_the_forwarded_header_is_ignored() {
+    let app = behind_proxies(
+        Limits {
+            max_rooms: 100,
+            rooms_per_ip: 1,
+        },
+        0,
+    );
+    assert_eq!(create_from(&app, "1.1.1.1").await, StatusCode::CREATED);
+    assert_eq!(
+        create_from(&app, "2.2.2.2").await,
+        StatusCode::TOO_MANY_REQUESTS
+    );
+}
+
+#[tokio::test]
+async fn the_health_check_answers_ok() {
+    let request = Request::get("/api/health").body(Body::empty()).unwrap();
+    let response = app(Limits::default()).oneshot(request).await.unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+    let body = response.into_body().collect().await.unwrap().to_bytes();
+    assert_eq!(&body[..], b"ok");
 }
 
 async fn post(app: &Router, uri: &str, body: Value) -> (StatusCode, Value) {

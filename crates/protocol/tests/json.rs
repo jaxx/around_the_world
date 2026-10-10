@@ -36,6 +36,7 @@ fn client_messages_are_tagged_by_type() {
         ClientMsg::Move { piece: PieceId(2) }
     );
     assert_eq!(client(json!({"type": "leave"})).unwrap(), ClientMsg::Leave);
+    assert_eq!(client(json!({"type": "ping"})).unwrap(), ClientMsg::Ping);
     assert_eq!(
         client(json!({"type": "rematch"})).unwrap(),
         ClientMsg::Rematch

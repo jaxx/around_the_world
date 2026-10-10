@@ -3,6 +3,7 @@
 //! tokio task, [`registry`] finds rooms by code and [`http`] puts it all on
 //! the network.
 
+pub mod client_ip;
 pub mod config;
 pub mod http;
 pub mod registry;

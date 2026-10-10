@@ -7,6 +7,10 @@ use std::time::Duration;
 use protocol::{ErrorCode, RoomView, SeatId, ServerMsg, Stage};
 use rules::{Color, Die, Event, Game};
 
+/// How often an open connection sends a heartbeat. A free host sleeps after
+/// 15 minutes without incoming messages (docs/adr/0002).
+pub const HEARTBEAT: Duration = Duration::from_secs(5 * 60);
+
 /// Longest wait between reconnection attempts.
 pub const MAX_RETRY: Duration = Duration::from_secs(10);
 

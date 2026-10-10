@@ -69,6 +69,9 @@ pub enum ClientMsg {
     Leave,
     /// Host only, after game over: back to the lobby with the same seats (uus mäng).
     Rematch,
+    /// Sent every few minutes; the server ignores it. It only keeps a
+    /// sleeping free host awake (docs/adr/0002-heartbeat-for-free-hosting.md).
+    Ping,
 }
 
 /// WebSocket messages from the server.

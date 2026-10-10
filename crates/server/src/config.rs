@@ -8,6 +8,9 @@ pub struct Config {
     pub port: u16,
     /// `STATIC_DIR`: the built browser client, if this server serves it.
     pub static_dir: Option<PathBuf>,
+    /// `TRUST_PROXY_HOPS`: how many proxies in front of the server append to
+    /// `X-Forwarded-For`; default 0 trusts none (see [`crate::client_ip`]).
+    pub proxy_hops: u8,
 }
 
 impl Config {
@@ -23,7 +26,18 @@ impl Config {
         let static_dir = var("STATIC_DIR")
             .filter(|dir| !dir.is_empty())
             .map(PathBuf::from);
-        Ok(Config { port, static_dir })
+        let proxy_hops = match var("TRUST_PROXY_HOPS") {
+            None => 0,
+            Some(hops) => hops
+                .trim()
+                .parse()
+                .map_err(|_| format!("TRUST_PROXY_HOPS must be a small number, got {hops:?}"))?,
+        };
+        Ok(Config {
+            port,
+            static_dir,
+            proxy_hops,
+        })
     }
 }
 
@@ -50,7 +64,8 @@ mod tests {
             Config::from_env(env(&[])),
             Ok(Config {
                 port: 8080,
-                static_dir: None
+                static_dir: None,
+                proxy_hops: 0
             })
         );
     }
@@ -61,7 +76,8 @@ mod tests {
             Config::from_env(env(&[("PORT", "3000"), ("STATIC_DIR", "dist")])),
             Ok(Config {
                 port: 3000,
-                static_dir: Some(PathBuf::from("dist"))
+                static_dir: Some(PathBuf::from("dist")),
+                proxy_hops: 0
             })
         );
     }
@@ -80,5 +96,17 @@ mod tests {
                 .static_dir,
             None
         );
+    }
+
+    #[test]
+    fn reads_the_trusted_proxy_hops() {
+        let config = Config::from_env(env(&[("TRUST_PROXY_HOPS", "3")])).unwrap();
+        assert_eq!(config.proxy_hops, 3);
+    }
+
+    #[test]
+    fn bad_proxy_hops_are_an_error() {
+        let err = Config::from_env(env(&[("TRUST_PROXY_HOPS", "many")])).unwrap_err();
+        assert!(err.contains("TRUST_PROXY_HOPS"), "{err}");
     }
 }

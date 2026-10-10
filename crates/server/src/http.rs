@@ -5,36 +5,61 @@ use std::net::SocketAddr;
 
 use axum::Router;
 use axum::extract::ws::WebSocketUpgrade;
-use axum::extract::{ConnectInfo, Json, Path, State};
-use axum::http::StatusCode;
+use axum::extract::{ConnectInfo, FromRef, Json, Path, State};
+use axum::http::{HeaderMap, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::routing::{get, post};
 use protocol::{ApiError, CreateRoom, ErrorCode, JoinRoom};
 use tower_http::services::{ServeDir, ServeFile};
 
+use crate::client_ip::client_ip;
 use crate::registry::Registry;
 use crate::ws;
 
 /// Largest WebSocket message a client may send.
 pub const MAX_MESSAGE: usize = 4 * 1024;
 
+#[derive(Clone)]
+struct Api {
+    registry: Registry,
+    /// Trusted proxies in front of the server ([`crate::client_ip`]).
+    proxy_hops: u8,
+}
+
+impl FromRef<Api> for Registry {
+    fn from_ref(api: &Api) -> Registry {
+        api.registry.clone()
+    }
+}
+
 /// All `/api` routes. Serve it with
 /// `into_make_service_with_connect_info::<SocketAddr>()`: room creation is
-/// rate-limited per client address.
-pub fn router(registry: Registry) -> Router {
+/// rate-limited per client address, read through `proxy_hops` trusted
+/// proxies.
+pub fn router(registry: Registry, proxy_hops: u8) -> Router {
     Router::new()
+        .route("/api/health", get(|| async { "ok" }))
         .route("/api/rooms", post(create_room))
         .route("/api/rooms/{code}/join", post(join_room))
         .route("/api/ws/{code}", get(open_socket))
-        .with_state(registry)
+        .with_state(Api {
+            registry,
+            proxy_hops,
+        })
 }
 
 async fn create_room(
-    State(registry): State<Registry>,
+    State(api): State<Api>,
     ConnectInfo(addr): ConnectInfo<SocketAddr>,
+    headers: HeaderMap,
     Json(body): Json<CreateRoom>,
 ) -> Response {
-    match registry.create(&body.nickname, addr.ip()) {
+    let forwarded = headers
+        .get("x-forwarded-for")
+        .and_then(|value| value.to_str().ok());
+    let ip = client_ip(forwarded, addr.ip(), api.proxy_hops);
+    tracing::debug!(?forwarded, peer = %addr.ip(), client = %ip, "creating a room");
+    match api.registry.create(&body.nickname, ip) {
         Ok(joined) => (StatusCode::CREATED, Json(joined)).into_response(),
         Err(code) => api_error(code),
     }
@@ -79,8 +104,8 @@ fn api_error(code: ErrorCode) -> Response {
 
 /// The API plus, when `static_dir` is given, the browser client: its files
 /// as they are, and `index.html` for invite links (`/r/{code}`).
-pub fn app(registry: Registry, static_dir: Option<&std::path::Path>) -> Router {
-    let api = router(registry);
+pub fn app(registry: Registry, static_dir: Option<&std::path::Path>, proxy_hops: u8) -> Router {
+    let api = router(registry, proxy_hops);
     match static_dir {
         None => api,
         Some(dir) => api
