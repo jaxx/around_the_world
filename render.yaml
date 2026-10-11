@@ -11,11 +11,13 @@ services:
     healthCheckPath: /api/health
     autoDeployTrigger: commit
     envVars:
-      # Proxies in front of the server that append to X-Forwarded-For. A
-      # starting guess for Render; check the "creating a room" debug log
-      # after the first deploy and adjust (see crates/server/src/client_ip.rs).
+      # Proxies in front of the server that append to X-Forwarded-For, checked
+      # in the "creating a room" debug log on 2026-10-11:
+      #   "<client>, <Cloudflare>, <Render balancer>" from peer 127.0.0.1
+      # so the client is the third entry from the right. Recheck it with
+      # RUST_LOG=info,server=debug if Render changes its proxies
+      # (see crates/server/src/client_ip.rs).
       - key: TRUST_PROXY_HOPS
         value: "3"
-      # Debug for the server while the proxy hops are being checked.
       - key: RUST_LOG
-        value: info,server=debug
+        value: info
